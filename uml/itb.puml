@@ -1,0 +1,254 @@
+@startuml
+class Startup {
+    + Startup(configuration:IConfiguration)
+    + Configuration : IConfiguration <<get>>
+    + ConfigureServices(services:IServiceCollection) : void
+    + Configure(app:IApplicationBuilder, env:IWebHostEnvironment) : void
+}
+class Program {
+    + {static} Main(args:string[]) : void
+    + {static} CreateHostBuilder(args:string[]) : IHostBuilder
+}
+class NotificationsController {
+    - <<readonly>> _logger : ILogger<NotificationsController>
+    - <<readonly>> _notificationsService : INotificationsService
+    + NotificationsController(logger:ILogger<NotificationsController>, notificationsService:INotificationsService)
+    + <<async>> Notify(update:Update) : Task<IActionResult>
+}
+Controller <|-- NotificationsController
+class TelegramConfiguration {
+    + Token : string <<get>> <<set>>
+    + WebhookPath : string <<get>> <<set>>
+}
+class ApplicationConfiguration {
+    + Url : string <<get>> <<set>>
+    + ApiUrl : string <<get>> <<set>>
+}
+class HomeKeyboard {
+    + <<override>> Message : string <<get>>
+    + <<override>> Markup : ReplyKeyboardMarkup <<get>>
+}
+Keyboard <|-- HomeKeyboard
+class ProfileNotAuthorizedKeyboard {
+    + <<override>> Message : string <<get>>
+    + <<override>> Markup : ReplyKeyboardMarkup <<get>>
+}
+Keyboard <|-- ProfileNotAuthorizedKeyboard
+class ProfileAuthorizedKeyboard {
+    + <<override>> Message : string <<get>>
+    + <<override>> Markup : ReplyKeyboardMarkup <<get>>
+}
+Keyboard <|-- ProfileAuthorizedKeyboard
+abstract class Keyboard {
+    + {abstract} Message : string <<get>>
+    + {abstract} Markup : ReplyKeyboardMarkup <<get>>
+}
+class BackToHomeKeyboard {
+    + <<override>> Message : string <<get>>
+    + <<override>> Markup : ReplyKeyboardMarkup <<get>>
+}
+Keyboard <|-- BackToHomeKeyboard
+class CompareAuthorizedKeyboard {
+    + <<override>> Message : string <<get>>
+    + <<override>> Markup : ReplyKeyboardMarkup <<get>>
+}
+Keyboard <|-- CompareAuthorizedKeyboard
+class AnalyzeAuthorizedKeyboard {
+    + <<override>> Message : string <<get>>
+    + <<override>> Markup : ReplyKeyboardMarkup <<get>>
+}
+Keyboard <|-- AnalyzeAuthorizedKeyboard
+class ProfileUsernameDeleteKeyboard {
+    + <<override>> Message : string <<get>>
+    + <<override>> Markup : ReplyKeyboardMarkup <<get>>
+}
+Keyboard <|-- ProfileUsernameDeleteKeyboard
+class ExtendedStatisticModel {
+    + TotalLikes : int <<get>> <<set>>
+    + MinLikes : int <<get>> <<set>>
+    + MaxLikes : int <<get>> <<set>>
+    + TotalComments : int <<get>> <<set>>
+    + MinComments : int <<get>> <<set>>
+    + MaxComments : int <<get>> <<set>>
+}
+StatisticModel <|-- ExtendedStatisticModel
+class ChatModel {
+    + Id : string <<get>> <<set>> = null
+    + ChatId : long <<get>> <<set>>
+    + Username : string <<get>> <<set>> = null
+    + Path : string <<get>> <<set>> = null
+    + State : string <<get>> <<set>> = null
+    + CreatedAt : DateTime <<get>> <<set>>
+    + UpdatedAt : DateTime <<get>> <<set>>
+}
+class StatisticModel {
+    + Id : string <<get>> <<set>> = null
+    + Username : string <<get>> <<set>> = null
+    + AvatarUrl : string <<get>> <<set>>
+    + PostsCount : int <<get>> <<set>>
+    + FollowedBy : int <<get>> <<set>>
+    + Follows : int <<get>> <<set>>
+    + Posts : List<StatisticsPostsModel> <<get>> <<set>>
+    + CreatedAt : DateTime <<get>> <<set>>
+    + UpdatedAt : DateTime <<get>> <<set>>
+}
+class StatisticsPostsModel {
+    + LikesCount : int <<get>> <<set>>
+    + CommentsCount : int <<get>> <<set>>
+}
+class HomeCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- HomeCommand
+class ProfileUpdateUsernameCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- ProfileUpdateUsernameCommand
+class ProfileDeleteUsernameCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- ProfileDeleteUsernameCommand
+class CompareProfilesCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- CompareProfilesCommand
+class ProfileCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- ProfileCommand
+abstract class Command {
+    + {abstract} Name : string <<get>>
+    + {abstract} Path : string <<get>>
+    + {abstract} Init(update:Update, notificationsService:INotificationsService) : Task
+    + {abstract} Execute(update:Update, notificationsService:INotificationsService) : Task
+    + <<async>> CheckBeforeHandle(update:Update, notificationsService:INotificationsService) : Task
+    + <<async>> Error(update:Update, notificationsService:INotificationsService) : Task
+    + NameEquals(name:string) : bool
+    + PathEquals(path:string) : bool
+}
+class Commands {
+    - <<readonly>> _commands : List<Command>
+    + Commands()
+    + GetCommandByName(name:string) : Command
+    + GetCommandByPath(path:string) : Command
+}
+class ProfileAddUsernameCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- ProfileAddUsernameCommand
+class ProfileAnalyzeMyProfileCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- ProfileAnalyzeMyProfileCommand
+class AnalyzeProfileCommand {
+    + <<override>> Name : string <<get>>
+    + <<override>> Path : string <<get>>
+    + <<override>> <<async>> Init(update:Update, notificationsService:INotificationsService) : Task
+    + <<override>> <<async>> Execute(update:Update, notificationsService:INotificationsService) : Task
+}
+Command <|-- AnalyzeProfileCommand
+interface IChatService {
+    + ReadOrCreateAsync(chatId:long) : Task<ChatModel>
+    + UpdatePathAsync(chatId:long, path:string) : Task<ChatModel>
+    + UpdateUsernameAsync(chatId:long, username:string) : Task<ChatModel>
+    + UpdateStateAsync(chatId:long, state:string) : Task<ChatModel>
+    + CreateAsync(chatId:long, username:string, path:string, state:string) : Task<ChatModel>
+    + ReadAsync(chatId:long) : Task<ChatModel>
+    + UpdateAsync(chatId:long, username:string, path:string, state:string) : Task<ChatModel>
+    + DeleteAsync(chatId:long) : Task
+}
+class ChatService {
+    - <<readonly>> _logger : ILogger<ChatService>
+    - <<readonly>> _applicationConfig : ApplicationConfiguration
+    + ChatService(logger:ILogger<ChatService>, applicationConfig:IOptions<ApplicationConfiguration>)
+    + <<async>> ReadOrCreateAsync(chatId:long) : Task<ChatModel>
+    + <<async>> UpdatePathAsync(chatId:long, path:string) : Task<ChatModel>
+    + <<async>> UpdateUsernameAsync(chatId:long, username:string) : Task<ChatModel>
+    + <<async>> UpdateStateAsync(chatId:long, state:string) : Task<ChatModel>
+    + <<async>> CreateAsync(chatId:long, username:string, path:string, state:string) : Task<ChatModel>
+    + <<async>> ReadAsync(chatId:long) : Task<ChatModel>
+    + <<async>> UpdateAsync(chatId:long, username:string, path:string, state:string) : Task<ChatModel>
+    + <<async>> DeleteAsync(chatId:long) : Task
+}
+IChatService <|-- ChatService
+interface ITelegramService {
+    + SetWebhookAsync() : Task
+    + SendTextMessageAsync(id:long, text:string, parseMode:ParseMode) : Task<Message>
+    + SendReplyKeyboardAsync(id:long, text:string, replyKeyboard:ReplyKeyboardMarkup, parseMode:ParseMode) : Task<Message>
+    + StartTypingAsync(id:long) : Task
+}
+class TelegramService {
+    - <<readonly>> _telegramConfig : TelegramConfiguration
+    - <<readonly>> _applicationConfig : ApplicationConfiguration
+    - <<readonly>> _client : TelegramBotClient
+    + TelegramService(telegramConfig:IOptions<TelegramConfiguration>, applicationConfig:IOptions<ApplicationConfiguration>)
+    + <<async>> SetWebhookAsync() : Task
+    + <<async>> SendTextMessageAsync(id:long, text:string, parseMode:ParseMode) : Task<Message>
+    + <<async>> SendReplyKeyboardAsync(id:long, text:string, replyKeyboard:ReplyKeyboardMarkup, parseMode:ParseMode) : Task<Message>
+    + <<async>> StartTypingAsync(id:long) : Task
+}
+ITelegramService <|-- TelegramService
+class StatisticService {
+    - <<readonly>> _logger : ILogger<StatisticService>
+    - <<readonly>> _applicationConfig : ApplicationConfiguration
+    + StatisticService(logger:ILogger<StatisticService>, applicationConfig:IOptions<ApplicationConfiguration>)
+    + <<async>> ReadAsync(username1:string, username2:string?) : Task<List<StatisticModel>>
+    + CalculateStatistic(statistics:List<StatisticModel>) : List<ExtendedStatisticModel>
+}
+IStatisticService <|-- StatisticService
+interface IStatisticService {
+    + ReadAsync(username1:string, username2:string?) : Task<List<StatisticModel>>
+    + CalculateStatistic(statistics:List<StatisticModel>) : List<ExtendedStatisticModel>
+}
+interface INotificationsService {
+    + Commands : Commands <<get>>
+    + HandleNotification(update:Update) : Task
+    + HandleCommand(update:Update) : Task
+    + InitCommandOrInitDefault(command:Command, update:Update) : Task
+    + ExecuteCommandOrInitDefault(command:Command, update:Update) : Task
+    + InitDefault(update:Update) : Task
+    + GetLogger() : ILogger<INotificationsService>
+    + GetTelegramService() : ITelegramService
+    + GetChatService() : IChatService
+    + GetStatisticService() : IStatisticService
+}
+class NotificationsService {
+    + Commands : Commands <<get>>
+    - <<readonly>> _logger : ILogger<NotificationsService>
+    - <<readonly>> _telegramService : ITelegramService
+    - <<readonly>> _chatService : IChatService
+    - <<readonly>> _statisticService : IStatisticService
+    + NotificationsService(logger:ILogger<NotificationsService>, telegramService:ITelegramService, chatService:IChatService, statisticService:IStatisticService)
+    + <<async>> HandleNotification(update:Update) : Task
+    + <<async>> HandleCommand(update:Update) : Task
+    + <<async>> InitCommandOrInitDefault(command:Command, update:Update) : Task
+    + <<async>> ExecuteCommandOrInitDefault(command:Command, update:Update) : Task
+    + <<async>> InitDefault(update:Update) : Task
+    + GetLogger() : ILogger<INotificationsService>
+    + GetTelegramService() : ITelegramService
+    + GetChatService() : IChatService
+    + GetStatisticService() : IStatisticService
+}
+INotificationsService <|-- NotificationsService
+@enduml
